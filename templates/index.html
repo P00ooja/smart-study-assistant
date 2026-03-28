@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Study Assistant</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 700px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        textarea, input[type="file"] {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* 🎨 Button colors */
+        .text-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .image-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .result {
+            margin-top: 20px;
+            background: #f1f3f5;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .result p, .result pre {
+            word-wrap: break-word;
+            white-space: pre-wrap; /* 🔥 FIX overflow */
+        }
+
+        .section {
+            margin-top: 20px;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>📚 Smart Study Assistant</h2>
+
+    <!-- TEXT INPUT -->
+    <div class="section">
+        <h3>Enter Text</h3>
+        <textarea id="textInput" rows="5" placeholder="Paste your text here..."></textarea>
+        <button class="text-btn" onclick="analyzeText()">Analyze Text</button>
+    </div>
+
+    <div class="divider">OR</div>
+
+    <!-- IMAGE INPUT -->
+    <div class="section">
+        <h3>Upload Image</h3>
+        <input type="file" id="imageInput">
+        <button class="image-btn" onclick="analyzeImage()">Analyze Image</button>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result">
+        <h3>Summary</h3>
+        <p id="summary"></p>
+
+        <h3>Questions</h3>
+        <pre id="questions"></pre>
+    </div>
+
+</div>
+
+<script>
+async function analyzeText() {
+    const text = document.getElementById("textInput").value;
+
+    const response = await fetch("/analyze", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text })
+    });
+
+    const data = await response.json();
+
+    document.getElementById("summary").innerText = data.summary || data.error;
+    document.getElementById("questions").innerText = data.questions || "";
+}
+
+async function analyzeImage() {
+    const fileInput = document.getElementById("imageInput");
+
+    if (!fileInput.files[0]) {
+        alert("Please select an image first");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", fileInput.files[0]);
+
+    const response = await fetch("/analyze-image", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+
+    document.getElementById("summary").innerText = data.summary || data.error;
+    document.getElementById("questions").innerText = data.questions || "";
+}
+</script>
+
+</body>
+</html>
